@@ -1,5 +1,4 @@
--- module Stack ( Stack, newS, freeCellsS, stackS, netS, holdsS, popS )
-module Stack ( Stack, newS, freeCellsS, stackS )
+module Stack ( Stack, newS, freeCellsS, stackS, netS, holdsS, popS )
   where
 
 import Palet
@@ -18,6 +17,18 @@ stackS (Sta pallets capacity) pallet
   | length pallets < capacity = Sta (pallet:pallets) capacity
   | otherwise = Sta pallets capacity
 
--- netS :: Stack -> Int                      -- responde el peso neto de los paletes en la pila
--- holdsS :: Stack -> Palet -> Route -> Bool -- indica si la pila puede aceptar el palet considerando las ciudades en la ruta
--- popS :: Stack -> String -> Stack          -- quita del tope los paletes con destino en la ciudad indicada
+netS :: Stack -> Int                      -- responde el peso neto de los paletes en la pila
+netS (Sta pallets _) = sum $ map netP pallets
+
+holdsS :: Stack -> Palet -> Route -> Bool -- indica si la pila puede aceptar el palet considerando las ciudades en la ruta
+holdsS (Sta pallets capacity) pallet route =
+  let pesoActual = netS (Sta pallets capacity)
+      destinoNuevo = destinationP pallet
+      destinoTope = if null pallets then destinoNuevo else destinationP (head pallets)
+  in length pallets < capacity
+     && pesoActual + netP pallet <= 10
+     && inOrderR route destinoNuevo destinoTope
+
+popS :: Stack -> String -> Stack          -- quita del tope los paletes con destino en la ciudad indicada
+popS (Sta pallets capacity) city = Sta (filter (\p -> destinationP p /= city) pallets) capacity
+
