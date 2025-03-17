@@ -1,0 +1,16 @@
+No me queda claro si hace falta hacer el error checking dentro de las funciones. 
+Ej: si inOrder tiene que chequear inRoute adentro. 
+Si no lo hace entonces el "False" puede significar:
+a) 2do antes que el primero 
+b) 1ro no esta en lista
+c) ninguno esta en lista
+Pero si lo hace entonces quizas vas a estar llamando inRouteR 2 veces al pedo siempre, si lo estas usando en main antes de usar inOrder.
+
+Mismo caso con stackS y freecells.
+
+mi opinion es que en este caso vale la pena hacer el error checking adentro 
+pq el uso de este codigo no necesita 100% optimizacion y son listas cortas seguramente etc.
+
+
+Otra cosa: para meter un palet quizas podriamos chequear cual es el stack optimo donde meter un nuevo palet en vez de meter en cualquiera.
+una forma facil seria contar la distancia (medido en indices entre ciudades en la ruta del Truck) entre la ciudad del palet a meter y la del tope de cada stack, y elegir la de minima distancia.
