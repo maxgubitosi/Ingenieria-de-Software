@@ -64,3 +64,41 @@ main = do
 -- Sta [Pal "Córdoba" 5,Pal "Rosario" 6] 3
 -- Sta [Pal "Rosario" 6,Pal "Buenos Aires" 4] 3
 -- Sta [Pal "Córdoba" 5,Pal "Rosario" 6,Pal "Buenos Aires" 4] 3
+
+
+
+
+
+
+
+
+
+
+-- otro mail de emilio:
+
+-- Hola
+
+-- Si incluyen estos imports
+-- import Control.Exception
+-- import System.IO.Unsafe
+
+-- luego pueden usar esta función que indica si una expresión falla o no al ser ejecutada
+-- testF :: Show a => a -> Bool
+-- testF action = unsafePerformIO $ do
+--     result <- tryJust isException (evaluate action)
+--     return $ case result of
+--         Left _ -> True
+--         Right _ -> False
+--     where
+--         isException :: SomeException -> Maybe ()
+--         isException _ = Just ()
+
+-- entonces,  a modo de ejemplo, pueden usarla así
+
+-- rutaCorta = newR [roma]
+-- rutaLarga = newR [roma, paris, mdq , berna]
+
+-- t = [ testF(newR []), 
+--       testF(inOrderR rutaCorta roma paris), 
+--       inOrderR rutaLarga roma mdq, 
+--       ...
