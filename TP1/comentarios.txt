@@ -14,3 +14,6 @@ pq el uso de este codigo no necesita 100% optimizacion y son listas cortas segur
 
 Otra cosa: para meter un palet quizas podriamos chequear cual es el stack optimo donde meter un nuevo palet en vez de meter en cualquiera.
 una forma facil seria contar la distancia (medido en indices entre ciudades en la ruta del Truck) entre la ciudad del palet a meter y la del tope de cada stack, y elegir la de minima distancia.
+
+
+Otra: rutas con ciudades repetidas ahi hay quilombo
