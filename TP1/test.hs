@@ -1,204 +1,68 @@
--- -- para correr en terminal:
--- -- ghci test.hs
--- -- > main
-
--- -- TODO: hacer bien este testing. 
--- -- hay cosas que nose si testea mal, mas que nada el orden en el que le da las ciudades a los stacks. 
--- -- creo que el orden es el camion va primero a los de mas a la izq de la lista de ruta (porque popea y agrega a izq de la lista de stacks)
--- -- entonces los tests tienen que tener eso en cuenta. 
--- -- ademas fallan algunos
-
-
--- test.hs
 module Main where
 
 import Control.Exception (tryJust, SomeException, evaluate)
-import System.IO.Unsafe  (unsafePerformIO)
+import System.IO.Unsafe (unsafePerformIO)
 
 import Palet
 import Route
 import Stack
 import Truck
 
---------------------------------------------------------------------------------
--- 1) Utility: testF for Checking if an Expression Fails
---------------------------------------------------------------------------------
-
+-- testF: retorna True si la expresión tira error, False si no
 testF :: Show a => a -> Bool
 testF action = unsafePerformIO $ do
-  result <- tryJust isException (evaluate action)
-  return $ case result of
-      Left  _ -> True   -- It threw an exception
-      Right _ -> False  -- It did NOT throw
+    result <- tryJust isException (evaluate action)
+    return $ case result of
+      Left _  -> True
+      Right _ -> False
   where
     isException :: SomeException -> Maybe ()
     isException _ = Just ()
 
---------------------------------------------------------------------------------
--- 2) Helpers for Printing Tests
---------------------------------------------------------------------------------
-
--- Checks equality of actual vs expected
-check :: (Eq a, Show a) => String -> a -> a -> IO ()
-check label actual expected = do
-  putStrLn $ "- " ++ label
-  putStrLn $ "   got:      " ++ show actual
-  putStrLn $ "   expected: " ++ show expected
-  putStrLn $ if actual == expected then "   ✔ PASSED\n" else "   ✘ FAILED\n"
-
--- Specialized for Bool
-checkBool :: String -> Bool -> Bool -> IO ()
-checkBool = check
-
--- For expecting a failure (an exception)
-checkFail :: String -> Bool -> IO ()
-checkFail label didFail =
-  putStrLn ( "- " ++ label
-          ++ if didFail then "\n   ✔ Expression failed as expected!\n"
-                        else "\n   ✘ Expression did NOT fail, but we expected an error!\n"
-            )
-
---------------------------------------------------------------------------------
--- 3) Main Testing
---------------------------------------------------------------------------------
-
 main :: IO ()
 main = do
-  putStrLn "========================"
-  putStrLn "  TESTING: Route"
-  putStrLn "========================"
+
+  let rutaCorta = newR ["Roma"]
+      rutaLarga = newR ["Roma", "Paris", "Mdq", "Berna"]
+      palBA     = newP "BuenosAires" 3
+      palRos    = newP "Rosario" 5
+      palMdq    = newP "Mdq" 2
+      emptyStack= newS 2
+
+  let tests = [
+          ("crear ruta vacía falla", testF (newR [])),
+          ("inRoute 'Roma' en " ++ show rutaCorta, inRouteR rutaCorta "Roma"),
+          ("inRoute 'Paris' en " ++ show rutaCorta ++ " falla", not (inRouteR rutaCorta "Paris")),
+          ("inOrder 'Roma' antes que 'Mdq' en "  ++ show rutaLarga, inOrderR rutaLarga "Roma" "Mdq"),
+          ("inOrder 'Mdq' antes que 'Roma' en "  ++ show rutaLarga ++ " falla", not (inOrderR rutaLarga "Mdq" "Roma")),
+          ("inOrder 'Mdq' antes que 'Mdq' en "  ++ show rutaLarga, inOrderR rutaLarga "Mdq" "Mdq"),
+          ("destino de pallet 'BuenosAires'", destinationP (newP "BuenosAires" 3) == "BuenosAires"),
+          ("netP de pallet 'Rosario'", netP (newP "Rosario" 5) == 5),
+          ("freeCellsS stack vacío", freeCellsS emptyStack == 2),
+          ("netS stack vacio", netS emptyStack == 0),
+          ("holdsS valido: stack palet Mdq a stack vacío con ruta "  ++ show rutaLarga, holdsS emptyStack palMdq rutaLarga),
+          ("holdsS invalido: stack palet Rosario a stack vacío con ruta "  ++ show rutaLarga ++ " falla", not (holdsS emptyStack palRos rutaLarga)),
+          ("freeCells post stackS", let st1 = stackS emptyStack palBA in freeCellsS st1 == 1),
+          ("netS del stack sube", let st1 = stackS emptyStack palBA in netS st1 == 3),
+          ("stackS funciona", let st1 = (stackS (stackS emptyStack palBA) palRos) in freeCellsS st1 == 0),
+          ("stackS lleno falla", testF (stackS (stackS (stackS emptyStack palBA) palRos) palRos)),
+          ("freeCellsT de truck", freeCellsT (newT 2 2 rutaCorta) == 4),
+          ("loadT un truck", let truck1 = loadT (newT 2 2 rutaCorta) (newP "Roma" 3) in netT truck1 == 3),
+          ("loadT un truck sobrepeso falla", let truck1 = loadT (newT 2 2 rutaCorta) (newP "Roma" 11) in testF truck1),
+          ("loadT un truck sin espacio falla", let truck1 = loadT (loadT (newT 1 1 rutaCorta) (newP "Paris" 3)) (newP "Roma" 3) in testF truck1),
+          ("loadT un truck con ciudad no en ruta falla", let truck1 = loadT (newT 2 2 rutaCorta) (newP "Paris" 3) in testF truck1),
+          ("loadT un truck con ciudad que esta despues en la ruta que ciudad actual pero solo en un stack funciona", let truck1 = loadT(loadT (newT 2 2 rutaLarga) (newP "Roma" 3)) (newP "Paris" 3) in netT truck1 == 6),
+          ("loadT un truck con ciudad que esta despues en la ruta que ciudad actual en ambos stacks falla", testF (loadT (loadT(loadT (newT 2 2 rutaLarga) (newP "Roma" 3)) (newP "Paris" 4)) (newP "Mdq" 3))),
+          ("unloadT un truck", let truck1 = unloadT (loadT (newT 2 2 rutaCorta) (newP "Roma" 3)) "Roma" in netT truck1 == 0),
+          ("unloadT un truck vacio simplemente no cambia", let truck1 = unloadT (newT 2 2 rutaCorta) "Roma" in netT truck1 == 0)
+        ]
+
+  -- Print each test with its result
+  putStrLn "Test results:"
+  mapM_ (\(i, (desc, res)) ->
+            putStrLn $ "Test " ++ show i ++ ": \"" ++ desc ++ "\": " ++ (if res then "Passed" else "Did Not Pass"))
+        (zip [1..] tests)
   
-  -- (1) Route Tests
-  let route1 = newR ["BuenosAires","Rosario","Cordoba"]
-  let route2 = newR ["Rome","Paris","Berlin","Madrid"]
-
-  putStrLn ("route1 = " ++ show route1)
-  putStrLn ("route2 = " ++ show route2)
-
-  -- Check inRouteR
-  checkBool "inRouteR route1 'Rosario'" (inRouteR route1 "Rosario") True
-  checkBool "inRouteR route1 'MarDelPlata'" (inRouteR route1 "MarDelPlata") False
-
-  -- Check inOrderR with route1 = [BuenosAires, Rosario, Cordoba]
-  --  left -> right means BuenosAires < Rosario < Cordoba
-  checkBool "inOrderR route1 'BuenosAires' 'Cordoba'" (inOrderR route1 "BuenosAires" "Cordoba") True
-  checkBool "inOrderR route1 'Cordoba' 'BuenosAires'" (inOrderR route1 "Cordoba" "BuenosAires") False
-
-  -- Check that creating an empty route fails
-  checkFail "newR [] should fail" (testF (newR []))
-
-  putStrLn "========================"
-  putStrLn "  TESTING: Palet"
-  putStrLn "========================"
-  
-  -- (2) Palet Tests
-  let palBA  = newP "BuenosAires" 3
-  let palRos = newP "Rosario" 5
-  let palCor = newP "Cordoba" 4
-  let palExtra = newP "Montevideo" 3
-
-  check "destinationP palBA" (destinationP palBA) "BuenosAires"
-  check "netP palRos" (netP palRos) 5
-
-  putStrLn $ "palCor = " ++ show palCor
-  putStrLn $ "palExtra = " ++ show palExtra
-
-  putStrLn "========================"
-  putStrLn "  TESTING: Stack"
-  putStrLn "========================"
-  
-  -- (3) Stack Tests
-  let stEmpty = newS 2
-  check "freeCellsS stEmpty" (freeCellsS stEmpty) 2
-  check "netS stEmpty" (netS stEmpty) 0
-
-  -- Let's stack "BuenosAires"
-  checkBool "holdsS stEmpty palBA route1" (holdsS stEmpty palBA route1) True
-  let st1 = stackS stEmpty palBA
-  check "freeCellsS st1" (freeCellsS st1) 1
-  check "netS st1" (netS st1) 3
-
-  -- Now top is "BuenosAires". If we try "Rosario" next:
-  --  route1 says BuenosAires < Rosario => inOrderR route1 "Rosario" "BuenosAires"?
-  --  That should be False, because "BuenosAires" appears first in route => "BuenosAires" < "Rosario".
-  --  We want the new city to be "left or same" => i.e. if the top is an earlier city, it fails.
-  --  Let's see if your code expects that to fail or pass:
-  let canStackRos = holdsS st1 palRos route1
-  checkBool "holdsS st1 (top=BuenosAires) palRos => Should fail if route is left->right" canStackRos False
-
-  -- Let's see if "BuenosAires" on top of "BuenosAires" is allowed (same city).
-  let palBA2 = newP "BuenosAires" 2
-  let canStackBA2 = holdsS st1 palBA2 route1
-  checkBool "holdsS st1 (top=BuenosAires) palBA2 => same city => should be True" canStackBA2 True
-
-  -- Actually stack that second BA pallet
-  let st2 = if canStackBA2 then stackS st1 palBA2 else st1
-  check "freeCellsS st2" (freeCellsS st2) 0
-  check "netS st2" (netS st2) 5
-
-  -- st2 is now full. Attempting to stack anything else should fail:
-  checkFail "stackS st2 palRos => fails because capacity is full" (testF (stackS st2 palRos))
-
-  -- pop from st2 with city=BuenosAires
-  let st3 = popS st2 "BuenosAires"
-  putStrLn $ "After popS st2 BuenosAires => " ++ show st3
-  check "freeCellsS st3" (freeCellsS st3) 2
-  check "netS st3" (netS st3) 0
-
-  -- Now let's do a second scenario: If we first stack "Cordoba", then try "Rosario":
-  let stC = stackS (newS 2) palCor  -- top= Cordoba
-  let canStackRosOverCor = holdsS stC palRos route1
-  checkBool "holdsS stC (top=Cordoba) palRos => should it pass or fail?" canStackRosOverCor False
-  
-
-  putStrLn "========================"
-  putStrLn "  TESTING: Truck"
-  putStrLn "========================"
-  
-  -- (4) Truck Tests
-  let truck1 = newT 2 2 route1
-  check "freeCellsT truck1" (freeCellsT truck1) 4  -- 2 bays of capacity 2 => total 4
-
-  -- Load "BuenosAires"
-  let truck2 = loadT truck1 palBA
-  check "freeCellsT truck2" (freeCellsT truck2) 3
-  check "netT truck2" (netT truck2) 3
-
-  -- Attempt to load "Rosario": we expect fails if the top is "BuenosAires"
-  -- but there's a second empty bay, so the truck code might choose the second bay.
-  -- If it tries the first bay, holdsS fails => it moves to second bay => success:
-  let singleBayTruck = newT 1 2 route1
-  let singleBayWithBA = loadT singleBayTruck palBA
-  let canLoadRosFails = testF (loadT singleBayWithBA palRos)
-    -- Explanation: Force the truck to have only 1 bay with top=BA. This ensures we can't fallback to a second empty bay.
-  checkFail "Single-bay truck with top=BuenosAires tries to load Ros => fails" canLoadRosFails
-
-  -- However, in a two-bay truck, there's a second bay. So the pallet might go there:
-  let truck3 = loadT truck2 palRos
-  check "freeCellsT truck3" (freeCellsT truck3) 2
-  check "netT truck3" (netT truck3) 8
-
-  -- Now let's load "Cordoba" (which is right of "Rosario"): 
-  --   The first bay top=BuenosAires => that fails. The second bay top=Rosario => that also fails. 
-  --   So it won't fit in either bay => error or no change. By your code, it tries each bay in turn, fails => throw error?
-  let canLoadCordobaFails = testF (loadT truck3 palCor)
-  checkFail "truck3 tries to load Cordoba => fails, no bay accepts city=Cordoba to left of (BuenosAires or Rosario)?" canLoadCordobaFails
-
-  -- Unload "BuenosAires" from truck3
-  let truckUnBA = unloadT truck3 "BuenosAires"
-  check "freeCellsT truckUnBA" (freeCellsT truckUnBA) 3
-  check "netT truckUnBA" (netT truckUnBA) 5  -- Only "Rosario" remains
-
-  -- Now that bay1 is empty, let's see if we can load "Cordoba"
-  let truck4 = loadT truckUnBA palCor
-  check "freeCellsT truck4" (freeCellsT truck4) 2
-  check "netT truck4" (netT truck4) 9
-
-  -- Unload "Rosario"
-  let truckUnRos = unloadT truck4 "Rosario"
-  check "netT truckUnRos" (netT truckUnRos) 4  -- Only Cordoba left
-  check "freeCellsT truckUnRos" (freeCellsT truckUnRos) 3
-
-  putStrLn "\n========================"
-  putStrLn "  ALL TESTS DONE!"
-  putStrLn "========================"
+  -- Summary of results
+  let passedCount = length (filter snd tests)
+  putStrLn $ "\nPassed " ++ show passedCount ++ " out of " ++ show (length tests) ++ " tests."

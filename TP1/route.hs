@@ -8,15 +8,23 @@ newR :: [ String ] -> Route                    -- construye una ruta segun una l
 newR []     = error "No se puede crear una ruta sin ciudades"
 newR cities = Rou cities
 
-inOrderR :: Route -> String -> String -> Bool  -- indica si la primer ciudad consultada esta antes que la segunda ciudad en la ruta
-inOrderR (Rou []) _ _ = False
-inOrderR (Rou (c:cs)) city1 city2             
-  | city1 == city2 = True
-  | c == city1 = True  -- Encontramos city1 antes que city2
-  | c == city2 = False -- Encontramos city2 antes que city1
-  | otherwise  = inOrderR (Rou cs) city1 city2
--- TODO: Esto no funciona si solo una ciudad esta en la ruta, o ninguna. Ver que hacer para eso, o simplemente usar siempre inRouteR antes de usar este
-
+inOrderR :: Route -> String -> String -> Bool     -- indica si la primer ciudad consultada esta antes que la segunda ciudad en la ruta
+inOrderR r@(Rou cities) city1 city2
+  | not (inRouteR r city1) = error (city1 ++ " no está en la ruta. Usar inRouteR para checkear")
+  | not (inRouteR r city2) = error (city2 ++ " no está en la ruta. Usar inRouteR para checkear")
+  | city1 == city2         = True  -- si son la misma ciudad queremos permitir que se considere antes que sí misma, (para poder agregar palets)
+  | otherwise              = inOrder_ cities
+  where
+    inOrder_ (c:cs)
+      | c == city1 = True 
+      | c == city2 = False
+      | otherwise  = inOrder_ cs
+-- Nota de implementación: Decidimos añadir checkeo (con inRouteR) en inOrderR.
+-- Esto es redundante si el usuario usa inRouteR de antemano,
+-- pero asi garantizamos no propagar errores en caso de uso inadecuado (si el usuario usa ciudades que no están en la ruta)
+-- Por ejemplo, sin un checkeo, inOrderR (Rou ["Roma"]) "Roma" "Paris" podría retornar True, lo cual podría propagar errores.
+-- Consideramos que el caso de uso de este modulo es en un contexto donde la eficiencia óptima no es crítica, 
+-- y es más valioso tener un chequeo más robusto
 
 inRouteR :: Route -> String -> Bool -- indica si la ciudad consultada está en la ruta
 inRouteR (Rou []) _ = False

@@ -17,13 +17,15 @@ newT numBays stackHeight route
 freeCellsT :: Truck -> Int            -- responde la celdas disponibles en el camion
 freeCellsT (Tru stacks _) = sum $ map freeCellsS stacks
 
-loadT :: Truck -> Palet -> Truck      -- carga un palet en el camion
-loadT (Tru [] _) _ = error "No hay bahías disponibles"
-loadT (Tru (s:ss) route) palet
-  | holdsS s palet route = Tru (stackS s palet:ss) route
-  | otherwise =
-    let Tru newstacks _ = loadT (Tru ss route) palet
-    in Tru (s:newstacks) route
+loadT :: Truck -> Palet -> Truck
+loadT (Tru stacks route) palet
+  | any (\s -> holdsS s palet route) stacks = Tru (load_ stacks palet route) route
+  | otherwise = error "El palet no puede ser cargado en ningun stack"
+  where
+    load_ [] _ _ = error "Truck no tiene stacks"
+    load_ (s:ss) palet route
+      | holdsS s palet route = stackS s palet : ss
+      | otherwise = s : load_ ss palet route
 
 unloadT :: Truck -> String -> Truck   -- responde un camion al que se le han descargado los paletes que podían descargarse en la ciudad
 unloadT (Tru stacks route) city = Tru (map (\s -> popS s city) stacks) route
