@@ -68,3 +68,32 @@ loadT :: Truck -> Palet -> Truck      -- carga un palet en el camion
 unloadT :: Truck -> String -> Truck   -- responde un camion al que se le han descargado los paletes que podían descargarse en la ciudad
 netT :: Truck -> Int                  -- responde el peso neto en toneladas de los paletes en el camion
 
+
+Notas extra:
+
+Hola
+
+Si incluyen estos imports
+import Control.Exception
+import System.IO.Unsafe
+
+luego pueden usar esta función que indica si una expresión falla o no al ser ejecutada
+testF :: Show a => a -> Bool
+testF action = unsafePerformIO $ do
+    result <- tryJust isException (evaluate action)
+    return $ case result of
+        Left _ -> True
+        Right _ -> False
+    where
+        isException :: SomeException -> Maybe ()
+        isException _ = Just ()
+
+entonces,  a modo de ejemplo, pueden usarla así
+
+rutaCorta = newR [roma]
+rutaLarga = newR [roma, paris, mdq , berna]
+
+t = [ testF(newR []), 
+      testF(inOrderR rutaCorta roma paris), 
+      inOrderR rutaLarga roma mdq, 
+      ...

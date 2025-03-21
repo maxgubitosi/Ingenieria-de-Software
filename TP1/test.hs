@@ -57,12 +57,12 @@ main = do
           ("unloadT un truck vacio simplemente no cambia", let truck1 = unloadT (newT 2 2 rutaCorta) "Roma" in netT truck1 == 0)
         ]
 
-  -- Print each test with its result
-  putStrLn "Test results:"
+
+  putStrLn "Resultados:"
   mapM_ (\(i, (desc, res)) ->
-            putStrLn $ "Test " ++ show i ++ ": \"" ++ desc ++ "\": " ++ (if res then "Passed" else "Did Not Pass"))
+            putStrLn $ "Test " ++ show i ++ ": \"" ++ desc ++ "\": " ++ (if res then "Pasa" else "No Pasa"))
         (zip [1..] tests)
   
-  -- Summary of results
+
   let passedCount = length (filter snd tests)
-  putStrLn $ "\nPassed " ++ show passedCount ++ " out of " ++ show (length tests) ++ " tests."
+  putStrLn $ "\nPasó " ++ show passedCount ++ " tests del total de " ++ show (length tests) ++ "."

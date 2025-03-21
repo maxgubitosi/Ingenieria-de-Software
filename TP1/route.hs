@@ -12,7 +12,7 @@ inOrderR :: Route -> String -> String -> Bool     -- indica si la primer ciudad 
 inOrderR r@(Rou cities) city1 city2
   | not (inRouteR r city1) = error (city1 ++ " no está en la ruta. Usar inRouteR para checkear")
   | not (inRouteR r city2) = error (city2 ++ " no está en la ruta. Usar inRouteR para checkear")
-  | city1 == city2         = True  -- si son la misma ciudad queremos permitir que se considere antes que sí misma, (para poder agregar palets)
+  | city1 == city2         = True  -- si son la misma ciudad queremos permitir que se considere antes que sí misma, (para permitir agregar palets)
   | otherwise              = inOrder_ cities
   where
     inOrder_ (c:cs)
