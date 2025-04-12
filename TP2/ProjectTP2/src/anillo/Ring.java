@@ -28,16 +28,17 @@ public class Ring {
         abstract Link next();
         abstract Object current();
         abstract Link remove();
-        abstract Link getPrev(Link from);
         abstract void setNext(Link next);
+        abstract void setPrev(Link prev);
+        abstract Link prev();
     }
 
-    // ---------- Clase para anillo vacío ----------
     private static class EmptyLink extends Link {
 
         public Link add(Object cargo) {
             ElementLink newLink = new ElementLink(cargo);
             newLink.setNext(newLink);
+            newLink.setPrev(newLink);
             return newLink;
         }
 
@@ -53,19 +54,15 @@ public class Ring {
             return this;
         }
 
-        public Link getPrev(Link from) {
-            return this;
-        }
-
-        public void setNext(Link next) {
-            // no hace nada
-        }
+        public void setNext(Link next) { }
+        public void setPrev(Link prev) { }
+        public Link prev() { return this; }
     }
 
-    // ---------- Clase para un eslabón con valor ----------
     private static class ElementLink extends Link {
         private final Object value;
         private Link next;
+        private Link prev;
 
         public ElementLink(Object value) {
             this.value = value;
@@ -73,9 +70,12 @@ public class Ring {
 
         public Link add(Object cargo) {
             ElementLink newLink = new ElementLink(cargo);
-            Link prev = getPrev(this);
-            prev.setNext(newLink);
+
             newLink.setNext(this);
+            newLink.setPrev(prev);
+
+            prev.setNext(newLink);
+            this.setPrev(newLink);
             return newLink;
         }
 
@@ -91,22 +91,22 @@ public class Ring {
             if (next == this) {
                 return new EmptyLink();
             } else {
-                Link prev = getPrev(this);
                 prev.setNext(next);
+                next.setPrev(prev);
                 return next;
             }
         }
 
-        public Link getPrev(Link current) {
-            Link link = this;
-            while (link.next() != current) {
-                link = link.next();
-            }
-            return link;
-        }
-
         public void setNext(Link next) {
             this.next = next;
+        }
+
+        public void setPrev(Link prev) {
+            this.prev = prev;
+        }
+
+        public Link prev() {
+            return prev;
         }
     }
 }
