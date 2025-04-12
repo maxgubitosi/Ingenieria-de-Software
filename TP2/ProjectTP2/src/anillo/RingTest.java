@@ -70,7 +70,7 @@ public class RingTest {
                                                   .current() );
     }
 
-    @Test void test10EmptyaRing() {
+    @Test void test10EmptyRing() {
         Ring ring = new Ring().add( "Hola" ).remove();
 
         assertThrows( Exception.class, () -> ring.current() );

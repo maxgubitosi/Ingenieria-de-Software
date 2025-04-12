@@ -23,21 +23,19 @@ public class Ring {
         return this;
     }
 
-    // ---------- Interfaz Link ----------
-    private interface Link {
-        Link add(Object cargo);
-        Link next();
-        Object current();
-        Link remove();
-        Link getPrev(Link from);
-        void setNext(Link next);
+    private static abstract class Link {
+        abstract Link add(Object cargo);
+        abstract Link next();
+        abstract Object current();
+        abstract Link remove();
+        abstract Link getPrev(Link from);
+        abstract void setNext(Link next);
     }
 
     // ---------- Clase para anillo vacío ----------
-    private static class EmptyLink implements Link {
+    private static class EmptyLink extends Link {
 
         public Link add(Object cargo) {
-            // crea el primer eslabón que apunta a sí mismo
             ElementLink newLink = new ElementLink(cargo);
             newLink.setNext(newLink);
             return newLink;
@@ -65,7 +63,7 @@ public class Ring {
     }
 
     // ---------- Clase para un eslabón con valor ----------
-    private static class ElementLink implements Link {
+    private static class ElementLink extends Link {
         private final Object value;
         private Link next;
 
@@ -91,7 +89,7 @@ public class Ring {
 
         public Link remove() {
             if (next == this) {
-                return new EmptyLink(); // era el único
+                return new EmptyLink();
             } else {
                 Link prev = getPrev(this);
                 prev.setNext(next);
@@ -99,9 +97,9 @@ public class Ring {
             }
         }
 
-        public Link getPrev(Link from) {
+        public Link getPrev(Link current) {
             Link link = this;
-            while (link.next() != from) {
+            while (link.next() != current) {
                 link = link.next();
             }
             return link;
