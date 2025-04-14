@@ -7,8 +7,6 @@ public abstract class Link {
     public abstract Link next();
     public abstract Object getCargo();
     public abstract Link removeMyself(Stack<RemovalStrategy> removalStrats);
-    public abstract void setNext(Link next);
-    public abstract void setPrev(Link prev);
 
     public static class EmptyLink extends Link {
 
@@ -31,22 +29,18 @@ public abstract class Link {
         public Link removeMyself(Stack<RemovalStrategy> removalStrats) {
             return this;
         }
-
-        public void setNext(Link next) { }
-
-        public void setPrev(Link prev) { }
     }
 
     public static class ElementLink extends Link {
         private final Object cargo;
-        private Link next;
-        private Link prev;
+        private ElementLink next;
+        private ElementLink prev;
 
         public ElementLink(Object value) {
             this.cargo = value;
         }
 
-        public Link addPrevLink(Object cargo, Stack<RemovalStrategy> removalStrats) {
+        public ElementLink addPrevLink(Object cargo, Stack<RemovalStrategy> removalStrats) {
             ElementLink newLink = new ElementLink(cargo);
             newLink.setNext(this);
             newLink.setPrev(prev);
@@ -69,19 +63,19 @@ public abstract class Link {
             return strat.execute(this);
         }
 
-        public Link getNextLink() {
+        public ElementLink getNextLink() {
             return next;
         }
 
-        public Link getPrevLink() {
+        public ElementLink getPrevLink() {
             return prev;
         }
 
-        public void setNext(Link next) {
+        public void setNext(ElementLink next) {
             this.next = next;
         }
 
-        public void setPrev(Link prev) {
+        public void setPrev(ElementLink prev) {
             this.prev = prev;
         }
     }
