@@ -1,37 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="8f6effa7-4afb-468d-ae12-d3c715c57e77" name="Changes" comment="" />
+    <list default="true" id="700627c2-33c1-403e-9cca-0eec41e35da5" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8
+  "associatedIndex": 0
 }]]></component>
-  <component name="ProjectId" id="2xHh3hi3WOk8qBbkfGRy48knU2A" />
+  <component name="ProjectId" id="2xHhCTccoCkdCdnbfYHA7nCOMaA" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Downloaded.Files.Path.Enabled": "false",
+    "JUnit.UnoTest.ApplyDrawTwoEffect.executor": "Run",
+    "JUnit.UnoTest.ColorMatches.executor": "Run",
+    "JUnit.UnoTest.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/maxi/Downloads/Actuales/IS/Ingenieria-de-Software/TP3/UNO",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RunManager" selected="JUnit.UnoTest">
+    <configuration name="UnoTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="UNO" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="uno.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="uno" />
+      <option name="MAIN_CLASS_NAME" value="uno.UnoTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UnoTest.ApplyDrawTwoEffect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="UNO" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="uno.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="uno" />
+      <option name="MAIN_CLASS_NAME" value="uno.UnoTest" />
+      <option name="METHOD_NAME" value="ApplyDrawTwoEffect" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UnoTest.ApplyReverseEffect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="UNO" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="uno.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="uno" />
+      <option name="MAIN_CLASS_NAME" value="uno.UnoTest" />
+      <option name="METHOD_NAME" value="ApplyReverseEffect" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UnoTest.ApplySkipEffect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="UNO" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="uno.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="uno" />
+      <option name="MAIN_CLASS_NAME" value="uno.UnoTest" />
+      <option name="METHOD_NAME" value="ApplySkipEffect" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UnoTest.ColorMatches" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="UNO" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="uno.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="uno" />
+      <option name="MAIN_CLASS_NAME" value="uno.UnoTest" />
+      <option name="METHOD_NAME" value="ColorMatches" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.UnoTest" />
+        <item itemvalue="JUnit.UnoTest.ApplyReverseEffect" />
+        <item itemvalue="JUnit.UnoTest.ApplySkipEffect" />
+        <item itemvalue="JUnit.UnoTest.ApplyDrawTwoEffect" />
+        <item itemvalue="JUnit.UnoTest.ColorMatches" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -42,12 +147,12 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="8f6effa7-4afb-468d-ae12-d3c715c57e77" name="Changes" comment="" />
-      <created>1747600708505</created>
+      <changelist id="700627c2-33c1-403e-9cca-0eec41e35da5" name="Changes" comment="" />
+      <created>1747600780392</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1747600708505</updated>
-      <workItem from="1747600709751" duration="71000" />
+      <updated>1747600780392</updated>
+      <workItem from="1747600781590" duration="6463000" />
     </task>
     <servers />
   </component>
