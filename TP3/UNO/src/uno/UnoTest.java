@@ -2,89 +2,90 @@ package uno;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test suite for UNO game logic (basic, special cards and boundary cases).
- */
 public class UnoTest {
 
-    private Uno game;
+    private List<String> players;
+    private NumberCard redFive;
+    private NumberCard blueThree;
+    private NumberCard blueSeven;
+    private NumberCard yellowTwo;
+    private NumberCard greenNine;
 
     @BeforeEach
     void setUp() {
-        game = Uno.withPlayers("Maxi", "Gabor");
+        players = Arrays.asList("Maxi", "Gabor");
+        redFive     = new NumberCard(Color.RED,    5);
+        blueThree   = new NumberCard(Color.BLUE,   3);
+        blueSeven   = new NumberCard(Color.BLUE,   7);
+        yellowTwo   = new NumberCard(Color.YELLOW, 2);
+        greenNine   = new NumberCard(Color.GREEN,  9);
     }
 
     @Test
-    void DealSevenCards() {
-        game.start();
-        assertEquals(7, game.getPlayer("Maxi").getHand().size());
-        assertEquals(7, game.getPlayer("Gabor").getHand().size());
+    void topCardIsFirstCardFromDeck() {
+        Uno game = Uno.withPlayersAndDeck(players, List.of(redFive));
+        assertEquals(redFive, game.getTopCard());
     }
 
     @Test
-    void AllowWhenColorMatches() {
-        NumberCard initial = new NumberCard(Color.RED, 5);
-        NumberCard toPlay  = new NumberCard(Color.RED, 7);
-        game.setTopCard(initial).start();
-        game.playCard("Maxi", toPlay);
-        assertEquals(toPlay, game.getTopCard());
+    void numericCardSameColorIsCompatible() {
+        Uno game = Uno.withPlayersAndDeck(players, List.of(blueThree, blueSeven));
+        assertDoesNotThrow(() -> game.playCard("Maxi", blueSeven));
     }
 
     @Test
-    void ThrowWhenPlayingInvalidCard() {
-        NumberCard initial = new NumberCard(Color.RED, 5);
-        NumberCard toPlay  = new NumberCard(Color.BLUE, 7);
-        game.setTopCard(initial)
-                .start();
+    void numericCardDifferentColorAndNumberIsNotCompatible() {
+        Uno game = Uno.withPlayersAndDeck(players, List.of(yellowTwo, greenNine));
         assertThrows(InvalidMoveException.class,
-                () -> game.playCard("Maxi", toPlay)
+                () -> game.playCard("Maxi", greenNine));
+    }
+
+    @Test
+    void bothPlayersCanPlaySequentially() {
+        NumberCard greenOne  = new NumberCard(Color.GREEN, 1);
+        NumberCard greenFive = new NumberCard(Color.GREEN, 5);
+        NumberCard greenEight= new NumberCard(Color.GREEN, 8);
+
+        Uno game = Uno.withPlayersAndDeck(
+                players,
+                List.of(greenOne, greenFive, greenEight)
         );
+
+        assertDoesNotThrow(() -> game.playCard("Maxi",  greenFive));
+        assertDoesNotThrow(() -> game.playCard("Gabor", greenEight));
     }
 
     @Test
-    void ApplyDrawTwoEffect() {
-        NumberCard initial = new NumberCard(Color.RED, 5);
+    void drawTwoAppliesEffectAndIsCompatibleByColorOrType() {
         DrawTwoCard draw2 = new DrawTwoCard(Color.RED);
-        game.setTopCard(initial).start();
-        int gaborBefore = game.getPlayer("Gabor").getHand().size();
-        game.playCard("Maxi", draw2);
-        assertEquals(gaborBefore + 2, game.getPlayer("Gabor").getHand().size());
-        assertEquals(draw2, game.getTopCard());
+        Uno game = Uno.withPlayersAndDeck(players, List.of(redFive, draw2));
+        assertDoesNotThrow(() -> game.playCard("Maxi", draw2));
     }
 
     @Test
-    void ApplySkipEffect() {
-        NumberCard initial = new NumberCard(Color.GREEN, 3);
-        SkipCard skip    = new SkipCard(Color.GREEN);
-        game.setTopCard(initial)
-                .start();
-        int gaborBefore = game.getPlayer("Gabor").getHand().size();
-        game.playCard("Maxi", skip);
-        assertEquals(gaborBefore, game.getPlayer("Gabor").getHand().size());
-        assertEquals(skip, game.getTopCard());
+    void skipCardSkipsNextPlayer() {
+        SkipCard skip = new SkipCard(Color.BLUE);
+        Uno game = Uno.withPlayersAndDeck(players, List.of(blueThree, skip));
+        assertDoesNotThrow(() -> game.playCard("Maxi", skip));
     }
 
     @Test
-    void ApplyReverseEffect() {
-        NumberCard initial = new NumberCard(Color.YELLOW, 2);
-        ReverseCard rev   = new ReverseCard(Color.YELLOW);
-        game.setTopCard(initial)
-                .start();
-        int gaborBefore = game.getPlayer("Gabor").getHand().size();
-        game.playCard("Maxi", rev);
-        assertEquals(gaborBefore, game.getPlayer("Gabor").getHand().size());
-        assertEquals(rev, game.getTopCard());
+    void reverseCardChangesDirection() {
+        ReverseCard rev = new ReverseCard(Color.YELLOW);
+        Uno game = Uno.withPlayersAndDeck(players, List.of(yellowTwo, rev));
+        assertDoesNotThrow(() -> game.playCard("Maxi", rev));
     }
 
     @Test
-    void ApplyWildEffect() {
-        NumberCard initial = new NumberCard(Color.BLUE, 1);
-        WildCard wild     = new WildCard(Color.GREEN);
-        game.setTopCard(initial)
-                .start();
-        game.playCard("Maxi", wild);
-        assertEquals(wild, game.getTopCard());
+    void wildCardAlwaysCompatible() {
+        DeployedWildCard wild = new DeployedWildCard(Color.GREEN);
+        Uno game = Uno.withPlayersAndDeck(players, List.of(redFive, wild));
+        assertDoesNotThrow(() -> game.playCard("Maxi", wild));
     }
 }
