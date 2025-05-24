@@ -6,8 +6,6 @@ import java.util.List;
 public class Player {
     private final String name;
     private final List<Card> hand = new ArrayList<>();
-    private Player next;
-    private Player prev;
 
     public Player(String name) {
         this.name = name;
@@ -17,33 +15,27 @@ public class Player {
         return name;
     }
 
-    public List<Card> getHand() {
-        return hand;
-    }
-
-    public void setNext(Player next) {
-        this.next = next;
-    }
-
-    public Player getNext() {
-        return next;
-    }
-
-    public void setPrev(Player prev) {
-        this.prev = prev;
-    }
-
-    public Player getPrev() {
-        return prev;
-    }
+//    public List<Card> getHand() {
+//        return hand;
+//    }
 
     public void addCard(Card card) {
         hand.add(card);
     }
 
-    public void playCard(Card card) {
+    // TODO: no me queda claro si se pueden sacar estos ifs.
+    public void playCard(Uno game, Card card) {            // old entry point
+        playCard(game, card, null);                        // delegate
+    }
+
+    public void playCard(Uno game, Card card, Color color) {
+        if (this != game.getCurrentPlayer())
+            throw new InvalidMoveException("No es el turno de " + name);
+        if (!card.isCompatible(game.getTopCard()))
+            throw new InvalidMoveException("Carta no es compatible");
         if (!hand.remove(card)) {
-            throw new RuntimeException("Player " + name + " does not have the specified card");
+            throw new InvalidMoveException("Jugador " + name + " no tiene la carta especificada");
         }
+        game.setTopCard(card.deploy(color).applyEffect(game));
     }
 }

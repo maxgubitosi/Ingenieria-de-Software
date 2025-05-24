@@ -11,20 +11,20 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UnoTest {
 
     private List<String> players;
-    private NumberCard redFive;
-    private NumberCard blueThree;
-    private NumberCard blueSeven;
-    private NumberCard yellowTwo;
-    private NumberCard greenNine;
+    private NumericCard redFive;
+    private NumericCard blueThree;
+    private NumericCard blueSeven;
+    private NumericCard yellowTwo;
+    private NumericCard greenNine;
 
     @BeforeEach
     void setUp() {
         players = Arrays.asList("Maxi", "Gabor");
-        redFive     = new NumberCard(Color.RED,    5);
-        blueThree   = new NumberCard(Color.BLUE,   3);
-        blueSeven   = new NumberCard(Color.BLUE,   7);
-        yellowTwo   = new NumberCard(Color.YELLOW, 2);
-        greenNine   = new NumberCard(Color.GREEN,  9);
+        redFive     = new NumericCard(Color.RED,    5);
+        blueThree   = new NumericCard(Color.BLUE,   3);
+        blueSeven   = new NumericCard(Color.BLUE,   7);
+        yellowTwo   = new NumericCard(Color.YELLOW, 2);
+        greenNine   = new NumericCard(Color.GREEN,  9);
     }
 
     @Test
@@ -48,9 +48,9 @@ public class UnoTest {
 
     @Test
     void bothPlayersCanPlaySequentially() {
-        NumberCard greenOne  = new NumberCard(Color.GREEN, 1);
-        NumberCard greenFive = new NumberCard(Color.GREEN, 5);
-        NumberCard greenEight= new NumberCard(Color.GREEN, 8);
+        NumericCard greenOne  = new NumericCard(Color.GREEN, 1);
+        NumericCard greenFive = new NumericCard(Color.GREEN, 5);
+        NumericCard greenEight= new NumericCard(Color.GREEN, 8);
 
         Uno game = Uno.withPlayersAndDeck(
                 players,
@@ -63,7 +63,7 @@ public class UnoTest {
 
     @Test
     void drawTwoAppliesEffectAndIsCompatibleByColorOrType() {
-        DrawTwoCard draw2 = new DrawTwoCard(Color.RED);
+        Draw2Card draw2 = new Draw2Card(Color.RED);
         Uno game = Uno.withPlayersAndDeck(players, List.of(redFive, draw2));
         assertDoesNotThrow(() -> game.playCard("Maxi", draw2));
     }
