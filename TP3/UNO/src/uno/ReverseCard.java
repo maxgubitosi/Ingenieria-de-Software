@@ -19,5 +19,8 @@ public class ReverseCard extends Card {
     public Color getColor() { return color; }
 
     @Override
-    public Card applyEffect(Uno game) { game.reverseDirection(); return this;}
+    public Card applyEffect(Uno game) {
+        game.reverseDirection();
+        return this;
+    }
 }

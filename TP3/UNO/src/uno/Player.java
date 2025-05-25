@@ -19,7 +19,6 @@ public class Player {
         hand.add(card);
     }
 
-    // TODO: no me queda claro si se pueden sacar estos ifs.
     public void playCard(Uno game, Card card) {
         if (this != game.getCurrentPlayer())
             throw new InvalidMoveException("No es el turno de " + name);

@@ -28,13 +28,11 @@ public class Uno {
         abstract Player peekNext(Uno g);
         Controller twin() {return twin;};
     }
-
     private static final class RightController extends Controller {
         void setTwin(Controller t) { twin = t; }
         @Override void   advance(Uno g) { g.players.forward(); }
         @Override Player peekNext(Uno g) { return g.players.next(); }
     }
-
     private static final class LeftController extends Controller {
         void setTwin(Controller t) { twin = t; }
         @Override void   advance(Uno g) { g.players.backward(); }
@@ -57,9 +55,6 @@ public class Uno {
 
         uno.topCard = uno.drawPile.poll();
 
-        // TODO: cambiar por version funcional???
-        //  me quedo medio feucho el tema del queue de cartas y repartija
-        //  quizas el player tiene que controlar lo de las 7 cartas. no el for este
         for (int round = 0; round < 7 && !uno.drawPile.isEmpty(); round++) {
             for (Player p : uno.players) {
                 if (uno.drawPile.isEmpty()) break;
@@ -92,6 +87,11 @@ public class Uno {
         Player next = turnController.peekNext(this);
         for (int i = 0; i < count && !drawPile.isEmpty(); i++)
             next.addCard(drawPile.pop());
+    }
+
+    public void addCardsToDrawPile(Collection<Card> cards) {
+        if (cards == null || cards.isEmpty()) return;
+        drawPile.addAll(cards);
     }
 
     public void reverseDirection() { turnController = turnController.twin(); }

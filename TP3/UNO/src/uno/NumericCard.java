@@ -24,5 +24,5 @@ public class NumericCard extends Card {
     }
 
     @Override
-    public Color getColor() { return color;}
+    public Color getColor() { return color; }
 }

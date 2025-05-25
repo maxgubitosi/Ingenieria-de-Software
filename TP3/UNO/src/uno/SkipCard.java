@@ -21,5 +21,6 @@ public class SkipCard extends Card {
     @Override
     public Card applyEffect(Uno game) {
         game.skipNextPlayer();
-        return this;}
+        return this;
+    }
 }
