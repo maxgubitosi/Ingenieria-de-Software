@@ -15,27 +15,31 @@ public class Player {
         return name;
     }
 
-//    public List<Card> getHand() {
-//        return hand;
-//    }
-
     public void addCard(Card card) {
         hand.add(card);
     }
 
     // TODO: no me queda claro si se pueden sacar estos ifs.
-    public void playCard(Uno game, Card card) {            // old entry point
-        playCard(game, card, null);                        // delegate
-    }
-
-    public void playCard(Uno game, Card card, Color color) {
+    public void playCard(Uno game, Card card) {
         if (this != game.getCurrentPlayer())
             throw new InvalidMoveException("No es el turno de " + name);
+
+        boolean saidUno = card.declaredUno();
+        card = card.unwrap();
+
         if (!card.isCompatible(game.getTopCard()))
             throw new InvalidMoveException("Carta no es compatible");
+        if (hand.size() == 2 && !saidUno) {
+            game.drawCardsForCurrentPlayer(2);
+        } else if (hand.size() > 2 && saidUno) {
+            throw new InvalidMoveException("UNO se declara solo al quedar con una carta");
+        }
         if (!hand.remove(card)) {
             throw new InvalidMoveException("Jugador " + name + " no tiene la carta especificada");
         }
-        game.setTopCard(card.deploy(color).applyEffect(game));
+
+        game.setTopCard(card.applyEffect(game));
+
+        if (hand.isEmpty()) {game.finish(this);}
     }
 }

@@ -21,6 +21,7 @@ public class Draw2Card extends Card {
     @Override
     public Card applyEffect(Uno game) {
         game.drawCardsForNextPlayer(2);
+        game.skipNextPlayer();
         return this;
     }
 }

@@ -1,6 +1,9 @@
 package uno;
 
 import java.util.*;
+import java.util.LinkedList;
+import java.util.Iterator;
+import java.util.AbstractCollection;
 
 public class Uno {
 
@@ -9,6 +12,15 @@ public class Uno {
 
     private Card       topCard;
     private Controller turnController;
+
+    private boolean finished = false;
+    private Player  winner   = null;
+
+    public Optional<Player> getWinner()  { return Optional.ofNullable(winner); }
+    public void finish(Player winner) {
+        finished = true;
+        this.winner = winner;
+    }
 
     private static abstract class Controller {
         protected Controller twin;
@@ -63,12 +75,17 @@ public class Uno {
         return uno;
     }
 
-
-    // TODO: quizas poner los Throws en el method signature? pq dijo que deverdad los que queres que el usuario conozca los haces exception asi le avisa al usuario que existe esa exception, sino no compila. osea hacer que InvalidMoveException extienda a Exception en vez de RuntimeException
-    // TODO: quedo raro que todo ocurra dentro del playCard del Player, nose si esta bien
     public void playCard(String playerName, Card card) {
+        if (finished) throw new IllegalStateException("La partida ya terminó. No se puede seguir jugando cartas.");
         getPlayer(playerName).playCard(this, card);
         turnController.advance(this);
+    }
+
+    public void drawCardsForCurrentPlayer(int count) {
+        Player currentPlayer = getCurrentPlayer();
+        for (int i = 0; i < count && !drawPile.isEmpty(); i++) {
+            currentPlayer.addCard(drawPile.pop());
+        }
     }
 
     public void drawCardsForNextPlayer(int count) {
@@ -88,61 +105,27 @@ public class Uno {
     }
 
     public Card getTopCard()      { return topCard;     }
-    // TODO: nose si hace falta esto o si esto es mas de la interfaz del juego que del modelo
     public Player getCurrentPlayer() { return this.players.curr(); }
-    public int  getPlayersCount() { return players.size(); }
 
     public void setTopCard(Card card) { topCard = card; }
 
-    // TODO: la verdad que esta re nasty esta implementacion de anillo, nose que me paso. pero el doubble linked list de java es medio feo comparado al de C++ pq no te deja tener un puntero al current.
-    // ver mejor forma de hacer el anillo de jugadores
-    static final class PlayerRing extends AbstractCollection<Player> {
+    // Usamos AbstractCollection en vez de Iterable
+    // para poder usar .stream() en getPlayer()
+    public static final class PlayerRing extends AbstractCollection<Player> {
 
-        private static final class Node {
-            final Player player;
-            Node next, prev;
-            Node(Player p) { this.player = p; }
-        }
+        private final LinkedList<Player> list = new LinkedList<>();
 
-        private Node current;
-        private int  size = 0;
+        @Override
+        public boolean add(Player p) { return list.add(p); }
 
-        public boolean add(Player p) {
-            Node n = new Node(p);
-            if (current == null) {
-                n.next = n.prev = n;
-                current = n;
-            } else {
-                Node tail = current.prev;
-                tail.next = n;
-                n.prev  = tail;
-                n.next  = current;
-                current.prev = n;
-            }
-            size++;
-            return true;
-        }
+        Player curr() { return list.getFirst(); }
+        Player next() { return list.get(1); }
+        Player prev() { return list.getLast(); }
 
-        Player curr() { return current.player; }
-        Player next() { return current.next.player; }
-        Player prev() { return current.prev.player; }
-        void   forward()  { current = current.next; }
-        void   backward() { current = current.prev; }
-        public int    size()     { return size; }
+        void forward()  { list.addLast(list.removeFirst()); }
+        void backward() { list.addFirst(list.removeLast()); }
 
-        @Override public Iterator<Player> iterator() {
-            Node start = current;
-            return new Iterator<>() {
-                private Node node = start;
-                private int  visited = 0;
-                @Override public boolean hasNext() { return visited < size; }
-                @Override public Player next() {
-                    Player out = node.player;
-                    node = node.next;
-                    visited++;
-                    return out;
-                }
-            };
-        }
+        @Override public int     size()        { return list.size(); }
+        @Override public Iterator<Player> iterator() { return list.iterator(); }
     }
 }

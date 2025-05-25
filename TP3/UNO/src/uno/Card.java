@@ -19,11 +19,19 @@ public abstract class Card {
 
     public Color getColor() {return null;}
 
-    public Card deploy(Color chosenColor) {   // default: “nothing to deploy”
+    public Card colorize(Color chosenColor) {
         return this;
     }
 
     public Card applyEffect(Uno game) {
         return this;
     }
+
+    public Card uno() {                           // ← default impl for every card
+        return new UnoDeclaredCard(this);
+    }
+
+    public boolean declaredUno()       { return false; }
+    public Card     unwrap()           { return this;  }
 }
+
