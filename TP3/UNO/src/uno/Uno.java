@@ -1,63 +1,102 @@
 package uno;
 
 import java.util.*;
+import java.util.LinkedList;
+import java.util.Iterator;
+import java.util.AbstractCollection;
 
-/**
- * Lógica principal de la partida UNO.
- */
 public class Uno {
-    private final List<Player> players = new ArrayList<>();
+
+    private final PlayerRing players = new PlayerRing();
     private final Deque<Card> drawPile = new ArrayDeque<>();
-    private final Deque<Card> discardPile = new ArrayDeque<>();
-    private Card topCard;
-    private int currentPlayerIndex;
-    private int direction = 1;
+
+    private Card       topCard;
+    private Controller turnController;
+
+    private boolean finished = false;
+    private Player  winner   = null;
+
+    public Optional<Player> getWinner()  { return Optional.ofNullable(winner); }
+    public void finish(Player winner) {
+        finished = true;
+        this.winner = winner;
+    }
+
+    private static abstract class Controller {
+        protected Controller twin;
+        abstract void   advance(Uno g);
+        abstract Player peekNext(Uno g);
+        Controller twin() {return twin;};
+    }
+    private static final class RightController extends Controller {
+        void setTwin(Controller t) { twin = t; }
+        @Override void   advance(Uno g) { g.players.forward(); }
+        @Override Player peekNext(Uno g) { return g.players.next(); }
+    }
+    private static final class LeftController extends Controller {
+        void setTwin(Controller t) { twin = t; }
+        @Override void   advance(Uno g) { g.players.backward(); }
+        @Override Player peekNext(Uno g) { return g.players.prev(); }
+    }
 
     private Uno() {}
 
-    /**
-     * Crea una partida con los nombres de jugadores dados.
-     */
-    public static Uno withPlayers(String... names) {
-        Uno game = new Uno();
-        for (String name : names) {
-            game.players.add(new Player(name));
-        }
-        game.initializeDrawPile();
-        return game;
-    }
+    public static Uno withPlayersAndDeck(List<String> names, List<Card> deck) {
+        if (names == null || names.size() < 2)
+            throw new IllegalArgumentException("Uno requiere al menos dos jugadores");
+        if (deck == null || deck.isEmpty())
+            throw new IllegalArgumentException("La baraja no puede estar vacía");
 
-    private void initializeDrawPile() {
-        // Para simplicidad, llenamos el mazo con cards numéricas rojas de valor 0
-        for (int i = 0; i < 100; i++) {
-            drawPile.addLast(new NumberCard(Color.RED, 0));
-        }
-    }
+        Uno uno = new Uno();
 
-    /**
-     * Define la carta inicial en cima del mazo de descarte.
-     */
-    public Uno setTopCard(Card card) {
-        this.topCard = card;
-        discardPile.push(card);
-        return this;
-    }
+        names.forEach(n -> uno.players.add(new Player(n)));
 
-    /**
-     * Inicia la partida repartiendo 7 cartas a cada jugador.
-     */
-    public void start() {
-        currentPlayerIndex = 0;
-        for (Player p : players) {
-            for (int i = 0; i < 7; i++) {
-                p.getHand().add(drawPile.pop());
+        uno.drawPile.addAll(new ArrayDeque<>(deck));
+
+        uno.topCard = uno.drawPile.poll();
+
+        for (int round = 0; round < 7 && !uno.drawPile.isEmpty(); round++) {
+            for (Player p : uno.players) {
+                if (uno.drawPile.isEmpty()) break;
+                p.addCard(uno.drawPile.poll());
             }
         }
+
+        RightController rc = new RightController();
+        LeftController  lc = new LeftController();
+        rc.setTwin(lc);  lc.setTwin(rc);
+        uno.turnController = rc;
+
+        return uno;
     }
 
-    /**
-     * Recupera un jugador por su nombre.
-     */
+    public void playCard(String playerName, Card card) {
+        if (finished) throw new IllegalStateException("La partida ya terminó. No se puede seguir jugando cartas.");
+        getPlayer(playerName).playCard(this, card);
+        turnController.advance(this);
+    }
+
+    public void drawCardsForCurrentPlayer(int count) {
+        Player currentPlayer = getCurrentPlayer();
+        for (int i = 0; i < count && !drawPile.isEmpty(); i++) {
+            currentPlayer.addCard(drawPile.pop());
+        }
+    }
+
+    public void drawCardsForNextPlayer(int count) {
+        Player next = turnController.peekNext(this);
+        for (int i = 0; i < count && !drawPile.isEmpty(); i++)
+            next.addCard(drawPile.pop());
+    }
+
+    public void addCardsToDrawPile(Collection<Card> cards) {
+        if (cards == null || cards.isEmpty()) return;
+        drawPile.addAll(cards);
+    }
+
+    public void reverseDirection() { turnController = turnController.twin(); }
+    public void skipNextPlayer()   { turnController.advance(this); }
+
     public Player getPlayer(String name) {
         return players.stream()
                 .filter(p -> p.getName().equals(name))
@@ -65,72 +104,28 @@ public class Uno {
                 .orElseThrow(() -> new RuntimeException("No existe jugador: " + name));
     }
 
-    /**
-     * Juega una carta, aplica su efecto y avanza el turno.
-     */
-    public void playCard(String playerName, Card card) {
-        // 1) Verifico primero si es jugada válida
-        if (topCard != null && !card.canPlayOn(topCard)) {
-            throw new InvalidMoveException("Movimiento inválido");
-        }
+    public Card getTopCard()      { return topCard;     }
+    public Player getCurrentPlayer() { return this.players.curr(); }
 
-        // 2) Sólo elimino la carta de la mano si realmente existía
-        Player p = getPlayer(playerName);
-        if (p.getHand().contains(card)) {
-            p.getHand().remove(card);
-        }
+    public void setTopCard(Card card) { topCard = card; }
 
-        // 3) Aplico la jugada
-        topCard = card;
-        discardPile.push(card);
-        card.applyEffect(this);
+    // Usamos AbstractCollection en vez de Iterable
+    // para poder usar .stream() en getPlayer()
+    public static final class PlayerRing extends AbstractCollection<Player> {
 
-        // 4) Avanzo el turno
-        advanceTurn();
-    }
+        private final LinkedList<Player> list = new LinkedList<>();
 
+        @Override
+        public boolean add(Player p) { return list.add(p); }
 
-    private void advanceTurn() {
-        currentPlayerIndex = (currentPlayerIndex + direction + players.size()) % players.size();
-    }
+        Player curr() { return list.getFirst(); }
+        Player next() { return list.get(1); }
+        Player prev() { return list.getLast(); }
 
-    /**
-     * El siguiente jugador pierde turno.
-     */
-    public void skipNextPlayer() {
-        advanceTurn();
-    }
+        void forward()  { list.addLast(list.removeFirst()); }
+        void backward() { list.addFirst(list.removeLast()); }
 
-    /**
-     * Invierte el sentido de juego.
-     */
-    public void reverseDirection() {
-        direction *= -1;
-    }
-
-    /**
-     * El siguiente jugador roba `count` cartas y pierde turno.
-     */
-    public void drawCardsForNextPlayer(int count) {
-        int nextIndex = (currentPlayerIndex + direction + players.size()) % players.size();
-        Player next = players.get(nextIndex);
-        for (int i = 0; i < count; i++) {
-            next.getHand().add(drawPile.pop());
-        }
-        skipNextPlayer();
-    }
-
-    /**
-     * Devuelve la carta en cima del descarte.
-     */
-    public Card getTopCard() {
-        return topCard;
-    }
-
-    /**
-     * Número de jugadores en la partida.
-     */
-    public int getPlayersCount() {
-        return players.size();
+        @Override public int     size()        { return list.size(); }
+        @Override public Iterator<Player> iterator() { return list.iterator(); }
     }
 }
