@@ -1,13 +1,13 @@
-package org.udesa.tp4b;
+package unobackend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Tp4bApplication {
+public class UnoBackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Tp4bApplication.class, args);
+        SpringApplication.run(UnoBackendApplication.class, args);
     }
 
 }

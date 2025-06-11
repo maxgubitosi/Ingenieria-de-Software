@@ -1,10 +1,10 @@
-package org.udesa.tp4b;
+package unobackend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Tp4bApplicationTests {
+class UnoBackendApplicationTests {
 
     @Test
     void contextLoads() {
