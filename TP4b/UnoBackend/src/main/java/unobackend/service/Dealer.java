@@ -14,30 +14,33 @@ public class Dealer {
     public List<Card> fullDeck() {
         ArrayList<Card> fullDeck = new ArrayList<>();
 
-        fullDeck.addAll(cardsOn("Red"));
-        fullDeck.addAll(cardsOn("Yellow"));
-        fullDeck.addAll(cardsOn("Blue"));
-        fullDeck.addAll(cardsOn("Green"));
+        for (String color : List.of("Red", "Blue", "Green", "Yellow")) {
+            fullDeck.addAll(allCardsColored(color));
+        }
+        fullDeck.addAll(List.of(new WildCard(),
+                                new WildCard(),
+                                new WildCard(),
+                                new WildCard())
+                        );
 
         Collections.shuffle(fullDeck);
         return fullDeck;
     }
 
-    private List<Card> cardsOn(String color) {
-        return List.of( new WildCard(),
-                        new SkipCard(color),
-                        new Draw2Card(color),
-                        new ReverseCard(color),
-                        new NumberCard(color, 0),
-                        new NumberCard(color, 1),
-                        new NumberCard(color, 2),
-                        new NumberCard(color, 3),
-                        new NumberCard(color, 4),
-                        new NumberCard(color, 5),
-                        new NumberCard(color, 6),
-                        new NumberCard(color, 7),
-                        new NumberCard(color, 8),
-                        new NumberCard(color, 9));
-    }
+    private List<Card> allCardsColored(String color) {
 
+        List<Card> cards = new ArrayList<>();
+        cards.add(new NumberCard(color, 0));
+
+        for (int i = 1; i <= 9; i++) {
+            cards.add(new NumberCard(color, i));
+            cards.add(new NumberCard(color, i));
+        }
+        for (int i = 0; i < 2; i++) {
+            cards.add(new Draw2Card(color));
+            cards.add(new ReverseCard(color));
+            cards.add(new SkipCard(color));
+        }
+        return cards;
+    }
 }

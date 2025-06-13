@@ -7,6 +7,8 @@ import java.util.function.Function;
 public class Match {
     public static String NotACardInHand = "Not a card in hand of ";
     public static String CardDoNotMatch = "Card does not match Color, Number or Kind";
+    public static String NotEnoughPlayers = "Not enough players to create game";
+    public static String EmptyOrNullPlayers = "Players must be valid strings";
     private Function<GameStatus, GameStatus> reverseShift;
     private Function<GameStatus, GameStatus> nextShift;
     private GameStatus status;
@@ -21,6 +23,16 @@ public class Match {
     }
 
     public Match( List<Card> deck, int cardsInHand, List<String> players ) {
+
+        // TODO: crear test de estos dos ifs a nivel del model. Simplemente con que no te deje crear un juego con menos de 2 o nombres no strings ta bien.
+        if ( players == null || players.size() <= 1 ) {
+            throw new IllegalArgumentException( NotEnoughPlayers ); }
+
+        for ( String player : players ) {
+            if (player == null || player.trim().isEmpty()) {
+                throw new IllegalArgumentException( EmptyOrNullPlayers );}
+        }
+
         discardPileHead = deck.remove( 0 );
         nextShift = (status) -> status.right();
         reverseShift = (status) -> status.left();
@@ -62,6 +74,9 @@ public class Match {
             draw();
             draw();
         }
+
+        // TODO: No chequea que le asignes color a una WildCard al jugarla??!!
+        // La verdad que no debe ser muy importante arreglar esto
 
         if ( player.noCardLeft() ) {
             status = new GameOver( player );

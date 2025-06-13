@@ -28,9 +28,10 @@ public class JsonCard {
     }
 
     @SneakyThrows public Card asCard() {
-        return (Card)Class.forName( "org.udesa.unoback.model." + type )
+        return (Card)Class.forName( "unobackend.model." + type )
                 .getMethod( "asCard", getClass() )
                 .invoke( getClass(), this );
     }
 }
+
 
