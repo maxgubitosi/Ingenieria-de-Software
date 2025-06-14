@@ -17,7 +17,7 @@ public class UnoController {
     @Autowired UnoService unoService;
 
     @ExceptionHandler(IllegalArgumentException.class) public ResponseEntity<String> handleIllegal(IllegalArgumentException exception) {
-        return ResponseEntity.badRequest().body( "Error: " + exception.getMessage() );
+        return ResponseEntity.internalServerError().body( "Error: " + exception.getMessage() );
     }
 
     @ExceptionHandler(RuntimeException.class) public ResponseEntity<String> handleRuntime(RuntimeException exception) {
@@ -33,8 +33,6 @@ public class UnoController {
 
 
 
-
-
     @PostMapping("newmatch")
     public ResponseEntity newMatch(@RequestParam List<String> players) {
         return ResponseEntity.ok(unoService.newMatch(players));
@@ -45,15 +43,15 @@ public class UnoController {
     public ResponseEntity play(@PathVariable UUID matchId,
                                @PathVariable String player,
                                @RequestBody JsonCard card) {
-        unoService.playerPlaysCard(matchId,player,card);
-        return ResponseEntity.ok("");
+        unoService.play(matchId,player,card.asCard());
+        return ResponseEntity.ok().build();
     }
     // curl -X POST "http://localhost:8080/play/UUID/Emilio" -H "Content-Type: application/json" -d '{"color":"Blue","number":6,"type":"NumberCard","shout":false}'//
 
     @PostMapping("draw/{matchId}/{player}")
     public ResponseEntity drawCard(@PathVariable UUID matchId, @PathVariable String player) {
-        unoService.playerDrawsCard(matchId, player);
-        return ResponseEntity.ok("");
+        unoService.drawCard(matchId, player);
+        return ResponseEntity.ok().build();
     }
     // curl -X POST "http://localhost:8080/drawCard/UUID/Emilio" -H "Accept: application/json"
 
