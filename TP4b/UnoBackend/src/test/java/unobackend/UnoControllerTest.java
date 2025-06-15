@@ -16,12 +16,10 @@ import unobackend.service.UnoService;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import java.util.List;
 
+import java.util.List;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -35,7 +33,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 class UnoControllerTest {
 
     @Autowired MockMvc mockMvc;
-    @MockBean  UnoService unoService; // TODO: julio tenia unoService en Autowired no en MockBean. pero para recibir un UUID especifico del service necesitamos Mockear.
+    @MockBean  UnoService unoService;
+    // Comentario: cambiamos el unoService a MockBean en vez de Autowired para poder mockear el UUID que devuelve newMatch por ejemplo
+    // Por un lado agrega más código porque tuvimos que mockear todo_ el comportamiento del service,
+    // Por otro lado de esta forma testeamos exclusivamente la capa controller en este test.
 
     UUID mockedId;
 
@@ -53,7 +54,6 @@ class UnoControllerTest {
                         .param("players", "Emilio", "Julio"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("\"" + mockedId.toString() + "\""));
-            // TODO: ver si posta deberia devolver con "" el UUID o no.
     }
 
     @Test
@@ -81,24 +81,6 @@ class UnoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(""));
     }
-
-    // TODO: esta era la implementacion de Julio, usa unoService en autowired entonces newGame entrega un UUID, pero como lo mockie, ya no puedo usar newMatch pq devuelve null en vez de UUID
-    // me parece que esta bien mockear el service entero total lo estamos testiando en unoServiceTest en autowired, y ahi si mockeo solo Dealer
-//    @Test
-//    void play_WrongTurnReturns400() throws Throwable {
-//        String uuid = newGame();
-//        assertNotNull(UUID.fromString(uuid));
-//
-//        List<JsonCard> cards = activeHand(uuid);
-//
-//        String resp = mockMvc.perform(post("/play/" + uuid + "/Julio")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(cards.getFirst().toString()))
-//                .andDo(print())
-//                .andExpect(status().is(400)).andReturn().getResponse().getContentAsString(); // 400 Bad request (no es turno de Julio)
-//
-//        assertEquals("Runtime Error: " + Player.NotPlayersTurn + "Julio", resp);
-//    }
 
     @Test
     void play_WrongTurnReturns400() throws Exception {

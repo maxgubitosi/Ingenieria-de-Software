@@ -6,11 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.mockito.Mockito;
 
 import unobackend.model.*;
 import unobackend.service.Dealer;
@@ -137,6 +132,14 @@ class UnoServiceTest {
     }
 
     @Test
+    void activeCard_InvalidMatchIdThrowsException() {
+        UUID rand = UUID.randomUUID();
+        assertThrows(RuntimeException.class,
+                () -> unoService.activeCard(rand),
+                "Active card lookup with unknown UUID should fail");
+    }
+
+    @Test
     void playerHand_InvalidIdThrowsException() {
         UUID matchId = unoService.newMatch(List.of("Emilio", "Julio"));
         UUID rand = UUID.randomUUID();
@@ -147,7 +150,7 @@ class UnoServiceTest {
     }
 
     @Test
-    void multipleMatches_IsolatedSessions() {
+    void multipleMatchesIsolatedSessions() {
         UUID id1 = unoService.newMatch(List.of("Emilio", "Julio"));
         UUID id2 = unoService.newMatch(List.of("Ana", "Bruno"));
 
@@ -163,7 +166,9 @@ class UnoServiceTest {
                 "Match 2’s hands should be unchanged");
     }
 
+
+
+
+
 }
-
-
 

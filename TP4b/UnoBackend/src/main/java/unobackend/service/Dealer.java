@@ -10,7 +10,6 @@ import java.util.List;
 @Component
 public class Dealer {
 
-    // genera el mazo para un nuevo match
     public List<Card> fullDeck() {
         ArrayList<Card> fullDeck = new ArrayList<>();
 

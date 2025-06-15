@@ -24,14 +24,10 @@ public class UnoController {
         return ResponseEntity.badRequest().body( "Runtime Error: " + exception.getMessage() );
     }
 
-    // Esto para agarrar los malos jsons que les pegan a .asCard() en JsonCard en principio
-    // TODO: quizas tiene sentido crear un BadJsonException o algo asi
     @ExceptionHandler({ClassNotFoundException.class})
     public ResponseEntity<String> handleReflectionExceptions(Exception exception) {
         return ResponseEntity.status( HttpStatus.NOT_FOUND ).body( "JSON parse error: " + exception.getMessage() );
     }
-
-
 
     @PostMapping("newmatch")
     public ResponseEntity newMatch(@RequestParam List<String> players) {
@@ -46,7 +42,7 @@ public class UnoController {
         unoService.play(matchId,player,card.asCard());
         return ResponseEntity.ok().build();
     }
-    // curl -X POST "http://localhost:8080/play/UUID/Emilio" -H "Content-Type: application/json" -d '{"color":"Blue","number":6,"type":"NumberCard","shout":false}'//
+    // curl -X POST "http://localhost:8080/play/UUID/Emilio" -H "Content-Type: application/json" -d '{"color":"Blue","number":6,"type":"NumberCard","shout":false}'
 
     @PostMapping("draw/{matchId}/{player}")
     public ResponseEntity drawCard(@PathVariable UUID matchId, @PathVariable String player) {
@@ -63,7 +59,6 @@ public class UnoController {
 
     @PostMapping("playerhand/{matchId}")
     public ResponseEntity playerHand(@PathVariable UUID matchId) {
-        // TODO: ver como devolver Error si recibe un matchId que no existe
         return ResponseEntity.ok(unoService.playerHand(matchId).stream().map(each -> each.asJson()));
     }
     // curl -X POST "http://localhost:8080/playerhand/UUID" -H "Accept: application/json"
